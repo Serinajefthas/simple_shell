@@ -10,27 +10,26 @@ char *get_path(char *command)
     /* variables to get value of PATH environment var */
     char *path, *path_cp, *path_loc, *full_path;
     int cmd_len = strlen(command);
-    int path_len;
+    int path_len, total_len;
     struct stat buffer;
-
+    
     path = getenv("PATH");
     if (path)
     {
         path_cp = strdup(path); /* dynamically allocats memory for path*/
         /* again breaks path into indiv path locations */
-        path_loc = strtok(path_cp, ":"); 
-    
+        path_loc = strtok(path_cp, ":");     
         // /* check if user input is a path */
         // if(stat(command, &buffer) == 0)
         //     return (command);
-
         /* while loop for exact path name by getting each path token and adding it to
         * full path name, separated by '/' and ending with '\0'
         */
         while (path_loc != NULL)
         {
             path_len = strlen(path_loc);
-            full_path = malloc(cmd_len + path_len + 2);
+            total_len = cmd_len + path_len + 2;
+            full_path = malloc(total_len);
             strcpy(full_path, path_loc);
             strcat(full_path, "/");
             strcat(full_path, command);
@@ -51,6 +50,7 @@ char *get_path(char *command)
         /* check if user input is a path */
         if(stat(command, &buffer) == 0)
             return (command);
+        
         return (NULL);
     }
     return (NULL);
@@ -63,7 +63,7 @@ char *get_path(char *command)
 */
 void cmd_exe(char **argv)
 {
-    char *cmd, *test_path;
+    char *cmd, *test_path = NULL;
 
     if (argv)
     {
@@ -72,11 +72,12 @@ void cmd_exe(char **argv)
         test_path = get_path(cmd);
         if (execve(test_path, argv, NULL) == -1)
             /* formatted error by execve function */
-            perror("Error: ");
+            perror("Error");
     }
 }
+
 /**
- * main - creates a simple shell interface
+ * main - executes inputted command(s)
  * @argc: argument count
  * @argv: argument array
  * Return: 0
@@ -85,10 +86,10 @@ int main(int argc __attribute__((unused)), char *argv[])
 {
     char *prompt = "$ ";
     /*store address of buffer holding user input */
-    char *cmd, *cmd_cp, *word;
-    const char *delim = " "; //different to source code (" \n")
-    size_t size;
-    ssize_t chars_read;
+    char *cmd = NULL, *cmd_cp = NULL, *word = NULL;
+    const char *delim = " \n";
+    size_t size = 0;
+    ssize_t chars_read = 0;
     int num_words = 0, i;
 
     while (1)
@@ -108,10 +109,10 @@ int main(int argc __attribute__((unused)), char *argv[])
         cmd_cp = malloc(sizeof(char) * chars_read);
         if (!cmd_cp)
         {
-            printf("Parsing memory alloc error");
+            perror("tsh: Parsing memory alloc error");
             return (-1);
         }
-        /* create copy to cmd copy ptr variable*/
+        /* copy to cmd copy ptr variable to alter*/
         strcpy(cmd_cp, cmd);
     
         /* splits input into array of words to interpret indiv */
@@ -132,7 +133,7 @@ int main(int argc __attribute__((unused)), char *argv[])
             strcpy(argv[i], word);
             word = strtok(NULL, delim);
         }
-        argv[i] = "NULL"; 
+        //argv[i] = "NULL"; 
         //End of separate method
             
             // test: prints content of argv array
@@ -143,6 +144,5 @@ int main(int argc __attribute__((unused)), char *argv[])
     }
     free(cmd);
     free(cmd_cp);
-   // free(argv);
     return (0);
 }
