@@ -19,9 +19,9 @@ char *get_path(char *command)
         path_cp = strdup(path); /* dynamically allocats memory for path*/
         /* again breaks path into indiv path locations */
         path_loc = strtok(path_cp, ":");     
-        // /* check if user input is a path */
-        // if(stat(command, &buffer) == 0)
-        //     return (command);
+        /* check if user input is a path */
+        /* if(stat(command, &buffer) == 0) */
+        /*     return (command); */
         /* while loop for exact path name by getting each path token and adding it to
         * full path name, separated by '/' and ending with '\0'
         */
@@ -34,7 +34,7 @@ char *get_path(char *command)
             strcat(full_path, "/");
             strcat(full_path, command);
             strcat(full_path, "\0");
-            //stat gets file status(if exists or not), placed in buffer
+            /* stat gets file status(if exists or not), placed in buffer */
             if(stat(full_path, &buffer) == 0)
             {
                     free(path_cp);
@@ -97,7 +97,7 @@ int main(int argc __attribute__((unused)), char *argv[])
         printf("%s", prompt);
         chars_read = getline(&cmd, &size, stdin);
 
-        // Can create sep method for parsing input:
+        /* Can create sep method for parsing input: */
         
         /* exit shell, ctrl d*/
         if (chars_read == -1)
@@ -133,12 +133,12 @@ int main(int argc __attribute__((unused)), char *argv[])
             strcpy(argv[i], word);
             word = strtok(NULL, delim);
         }
-        //argv[i] = "NULL"; 
-        //End of separate method
+        /* argv[i] = "NULL"; */
+        /* End of separate method */
             
-            // test: prints content of argv array
-            //for (j = 0; j < num_words-1; j++)
-            //    printf("%s\n", argv[j]);
+            /* test: prints content of argv array */
+            /* for (j = 0; j < num_words-1; j++) */
+            /* printf("%s\n", argv[j]); */
             
         cmd_exe(argv);
     }
