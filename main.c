@@ -155,7 +155,6 @@ int main(int argc __attribute__((unused)), char *argv[])
             strcpy(argv[i], word);
             word = strtok(NULL, delim);
         }
-        /* argv[i] = "NULL"; */
         /* End of separate method */
             
             /* test: prints content of argv array */
