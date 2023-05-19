@@ -77,6 +77,28 @@ void cmd_exe(char **argv)
 }
 
 /**
+ * cmdlineArg - handles command line arguments
+ * argc: argument count
+ * argv: argument vector
+ * Return: Always 0 for success
+ */
+void cmdlineArg(int argc, char *argv[])
+{
+	int j;
+
+	if (argc < 2)
+	{
+		printf("No arguments\n");
+		return;
+	}
+	printf("Number of arguments: %d\n", argc -1);
+	printf("Arguments:\n");
+	for (j = 1; j < argc; j++)
+	{
+		printf("%s\n", argv[j]);
+	}
+}
+/**
  * main - executes inputted command(s)
  * @argc: argument count
  * @argv: argument array
@@ -142,6 +164,7 @@ int main(int argc __attribute__((unused)), char *argv[])
             
         cmd_exe(argv);
     }
+    cmdlineArg(argc, argv);
     free(cmd);
     free(cmd_cp);
     return (0);
