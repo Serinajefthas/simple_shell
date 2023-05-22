@@ -1,5 +1,8 @@
 #include "main.h"
 
+/* output must match /bin/sh output(incl errors) -  use as checker! */
+extern char **environ;
+
 /**
  * get_path - returns path for each cmd typed
  * @command: command from user input
@@ -19,9 +22,6 @@ char *get_path(char *command)
         path_cp = strdup(path); /* dynamically allocats memory for path*/
         /* again breaks path into indiv path locations */
         path_loc = strtok(path_cp, ":");     
-        /* check if user input is a path */
-        /* if(stat(command, &buffer) == 0) */
-        /*     return (command); */
         /* while loop for exact path name by getting each path token and adding it to
         * full path name, separated by '/' and ending with '\0'
         */
@@ -34,7 +34,7 @@ char *get_path(char *command)
             strcat(full_path, "/");
             strcat(full_path, command);
             strcat(full_path, "\0");
-            /* stat gets file status(if exists or not), placed in buffer */
+            /*stat gets file status(if exists or not), placed in buffer*/
             if(stat(full_path, &buffer) == 0)
             {
                     free(path_cp);
@@ -64,79 +64,85 @@ char *get_path(char *command)
 void cmd_exe(char **argv)
 {
     char *cmd, *test_path = NULL;
+    char **env = environ;
+    pid_t pid;
+    pid_t ppid;
 
     if (argv)
     {
         /* first index is command, second is file/path */
         cmd = argv[0];
+        if (strcmp(cmd, "exit") == 0) /*exit functionality w 'exit' input*/
+        {
+            printf("exit\n");
+            exit(0);
+        }
+        /* prints environnment variables */
+        if (strcmp(cmd, "env") == 0)
+        {
+            for (; *env; env++)
+                printf("%s\n", *env);
+            return;
+        }
+        if (strcmp(cmd, "pid") == 0)
+        {
+            pid = getpid(); printf("%u\n", pid); 
+	    return;
+        }
+        if (strcmp(cmd, "ppid") == 0)
+        {
+            ppid = getppid(); printf("%u\n", ppid); 
+	    return; 
+        }
         test_path = get_path(cmd);
-        if (execve(test_path, argv, NULL) == -1)
+        if (execve(test_path, argv, NULL) == -1){
             /* formatted error by execve function */
             perror("Error");
+            return;
+        }
+        else if (execve(test_path, argv, NULL) == 0)
+        {
+            execve(test_path, argv, NULL);
+            return;
+        }
     }
 }
 
 /**
- * cmdlineArg - handles command line arguments
- * argc: argument count
- * argv: argument vector
- * Return: Always 0 for success
- */
-void cmdlineArg(int argc, char *argv[])
-{
-	int j;
-
-	if (argc < 2)
-	{
-		printf("No arguments\n");
-		return;
-	}
-	printf("Number of arguments: %d\n", argc -1);
-	printf("Arguments:\n");
-	for (j = 1; j < argc; j++)
-	{
-		printf("%s\n", argv[j]);
-	}
-}
-/**
- * main - executes inputted command(s)
- * @argc: argument count
- * @argv: argument array
- * Return: 0
+ * main_loop - main while loop for shell
+ * @cmd: command inputted by user
+ * @cmd_cp: copy of cmd ptr
+ * @argv: argument vector
+ * 
 */
-int main(int argc __attribute__((unused)), char *argv[])
+void main_loop(char *cmd, char *cmd_cp, char *argv[])
 {
-    char *prompt = "$ ";
-    /*store address of buffer holding user input */
-    char *cmd = NULL, *cmd_cp = NULL, *word = NULL;
+    char *prompt = "($) ", *word = NULL;
     const char *delim = " \n";
-    size_t size = 0;
-    ssize_t chars_read = 0;
     int num_words = 0, i;
+    size_t size = 0; ssize_t chars_read = 0;
 
     while (1)
     {
         printf("%s", prompt);
         chars_read = getline(&cmd, &size, stdin);
-
-        /* Can create sep method for parsing input: */
-        
         /* exit shell, ctrl d*/
         if (chars_read == -1)
         {
-            printf("Exit shell\n");
-            return (-1);
+            printf("exit\n");
+            exit(0);
         }
         /* parsing/tokenising user input */ 
         cmd_cp = malloc(sizeof(char) * chars_read);
         if (!cmd_cp)
         {
             perror("tsh: Parsing memory alloc error");
-            return (-1);
+            exit(0);
         }
-        /* copy to cmd copy ptr variable to alter*/
+        
+        /* copy to cmd_copy ptr variable to manipulate*/
         strcpy(cmd_cp, cmd);
-    
+        
         /* splits input into array of words to interpret indiv */
         word = strtok(cmd, delim);
         while (word != NULL)
@@ -155,15 +161,35 @@ int main(int argc __attribute__((unused)), char *argv[])
             strcpy(argv[i], word);
             word = strtok(NULL, delim);
         }
-        /* End of separate method */
-            
-            /* test: prints content of argv array */
-            /* for (j = 0; j < num_words-1; j++) */
-            /* printf("%s\n", argv[j]); */
-            
         cmd_exe(argv);
     }
-    cmdlineArg(argc, argv);
+}
+
+/**
+ * main - executes inputted command(s)
+ * @argc: argument count
+ * @argv: argument array
+ * Return: 0
+*/
+int main(int argc, char *argv[])
+{
+    /*store address of buffer holding user input */
+    char *cmd = NULL, *cmd_cp = NULL;
+    int j;
+
+    if (argc == 1)
+        printf("No arguments\n");
+    else
+    {
+        printf("Number of arguments: %d\n", argc -1);
+        printf("Arguments: ");
+        for (j = 1; j < argc; j++)
+        {
+            printf("%s ", argv[j]);
+        }
+        printf("\n");
+    }
+    main_loop(cmd, cmd_cp, argv);
     free(cmd);
     free(cmd_cp);
     return (0);
