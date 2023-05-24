@@ -11,3 +11,4 @@ int main(int argc __attribute__((unused)), char *argv[]);
 void *_realloca(void *, unsigned int, unsigned int);
 char *memryset(char *, char, unsigned int);
 void _freestr(char **);
+void handComm(char *ln);
