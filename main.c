@@ -1,5 +1,6 @@
 #include "main.h"
-extern char **environ; 
+/* output must match /bin/sh output(incl errors) -  use as checker! */
+/* extern char **environ; */
 /**
 * get_path - returns path for each cmd typed
 * @command: command from user input
@@ -47,57 +48,48 @@ return (NULL);
 * @argv: array of arguments
 * Return: 0 on success
 */
-int cmd_exe(char **argv)
+void cmd_exe(char **argv)
 {
-char *cmd, *test_path = NULL, **env = environ;
-pid_t pid, ppid;
+char *cmd, *test_path = NULL, **env;
+pid_t pid;
+pid_t ppid;
 
 if (argv)
 {
-pid = fork();
-if (pid < 0)
-exit(EXIT_FAILURE);
-else if (pid == 0)
-{
 cmd = argv[0];/* first index is command, second is file/path */
-test_path = get_path(cmd);
 if (strcmp(cmd, "exit") == 0) /*exit functionality w 'exit' input*/
 {
 printf("exit\n");
-return (1);
+exit(0);
 }
-if (strcmp(cmd, "env") == 0)
+if (strcmp(cmd, "env") == 0)/* prints environnment variables */
 {
 for (; *env; env++)
 printf("%s\n", *env);
-return (0);
+return;
 }
 if (strcmp(cmd, "pid") == 0)
 {
-pid = getpid(); 
-printf("%u\n", pid); 
-return (0);
+pid = getpid();
+printf("%u\n", pid);
+return;
 }
 if (strcmp(cmd, "ppid") == 0)
 {
-ppid = getppid(); 
-printf("%u\n", ppid); 
-return (0); 
+ppid = getppid();
+printf("%u\n", ppid);
+return;
 }
-if (execve(test_path, argv, NULL) == -1){
-printf("Error: command not found\n");
-return (0);
-}
-else
+test_path = get_path(cmd);
+if (execve(test_path, argv, NULL) == -1)
 {
+perror("Error");/* formatted error by execve function */
+return;
+}
+else if (execve(test_path, argv, NULL) == 0)
 execve(test_path, argv, NULL);
-return (0);
+return;
 }
-}
-else if (pid > 0)
-wait(NULL);
-}
-return (1);
 }
 /**
 * main_loop - main while loop for shell
@@ -110,12 +102,14 @@ void main_loop(char *cmd, char *cmd_cp, char *argv[])
 char *prompt = "($) ", *word = NULL;
 const char *delim = " \n";
 int num_words = 0, i;
-size_t size = 0; ssize_t chars_read = 0;
+size_t size = 0;
+ssize_t chars_read = 0;
 
 while (1)
 {
 printf("%s", prompt);
 chars_read = getline(&cmd, &size, stdin);
+printf("%s", cmd);
 if (chars_read == -1)/* exit shell, ctrl d*/
 {
 printf("exit\n");
@@ -143,8 +137,7 @@ argv[i] = malloc(sizeof(char) * strlen(word));
 strcpy(argv[i], word);
 word = strtok(NULL, delim);
 }
-if (!cmd_exe(argv))
-exit(0);
+cmd_exe(argv);
 }
 }
 /**
@@ -156,15 +149,28 @@ exit(0);
 int main(int argc, char *argv[])
 {
 /*store address of buffer holding user input */
-char *cmd = NULL, *cmd_cp = NULL;
+char *cmd = NULL, *cmd_cp = NULL, ln[99];
+int j;
 
 if (argc == 1)
-main_loop(cmd, cmd_cp, argv);
-else if (argc == 2)
+printf("No arguments\n");
+else
 {
-cmd = argv[1]; cmd_cp = argv[1];
-main_loop(cmd, cmd_cp, argv);
+printf("Number of arguments: %d\n", argc - 1);
+printf("Arguments: ");
+for (j = 1; j < argc; j++)
+{
+printf("%s ", argv[j]);
 }
+printf("\n");
+}
+{
+    printf("Enter code here (use '#' for comments):\n");
+    fgets(ln, sizeof(ln), stdin);
+    printf("This code has no  comments:\n");
+    handComm(ln);
+}
+main_loop(cmd, cmd_cp, argv);
 free(cmd);
 free(cmd_cp);
 return (0);
