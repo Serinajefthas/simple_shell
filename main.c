@@ -149,7 +149,7 @@ cmd_exe(argv);
 int main(int argc, char *argv[])
 {
 /*store address of buffer holding user input */
-char *cmd = NULL, *cmd_cp = NULL, ln[99];
+char *cmd = NULL, *cmd_cp = NULL;
 int j;
 
 if (argc == 1)
@@ -163,12 +163,6 @@ for (j = 1; j < argc; j++)
 printf("%s ", argv[j]);
 }
 printf("\n");
-}
-{
-    printf("Enter code here (use '#' for comments):\n");
-    fgets(ln, sizeof(ln), stdin);
-    printf("This code has no  comments:\n");
-    handComm(ln);
 }
 main_loop(cmd, cmd_cp, argv);
 free(cmd);
