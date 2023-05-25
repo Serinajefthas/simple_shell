@@ -14,7 +14,7 @@ char *get_path(char *command)
     path = getenv("PATH");
     if (path)
     {
-        path_cp = strdup(path); /* dynamically allocats memory for path*/
+        path_cp = strdup(path); /* dynamically allocates memory for path*/
         path_loc = strtok(path_cp, ":");
         while (path_loc != NULL)
         {
@@ -50,32 +50,31 @@ char *get_path(char *command)
 */
 void cmd_exe(char **argv)
 {
-    char *cmd, *test_path = NULL, **env;
-    pid_t pid, ppid;
+    char *cmd, *test_path = NULL, **env = environ;
 
     if (argv)
     {
-    cmd = argv[0];/* first index is command, second is file/path */
+        cmd = argv[0];/* first index is command, second is file/path */
         if (strcmp(cmd, "exit") == 0) /*exit functionality w 'exit' input*/
         {
             printf("exit\n");
             exit(0);
         }
-    if (strcmp(cmd, "env") == 0)/* prints environnment variables */
-    {
-        for (; *env; env++)
-            printf("%s\n", *env);
-        return;
-    }
-    test_path = get_path(cmd);
-    if (execve(test_path, argv, NULL) == -1)
-    {
-        perror("Error");/* formatted error by execve function */
-        return;
-    }
-    else if (execve(test_path, argv, NULL) == 0)
-        execve(test_path, argv, NULL);
-    return;
+		if (strcmp(cmd, "env") == 0)/* prints environnment variables */
+		{
+			for (; *env; env++)
+				printf("%s\n", *env);
+			return;
+		}
+		test_path = get_path(cmd);
+		if (execve(test_path, argv, NULL) == -1)
+		{
+			perror("Error");/* formatted error by execve function */
+			return;
+		}
+		else if (execve(test_path, argv, NULL) == 0)
+			execve(test_path, argv, NULL);
+		return;
     }
 }
 /**
