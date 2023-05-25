@@ -25,7 +25,7 @@ char *get_path(char *command)
             strcat(full_path, "/");
             strcat(full_path, command);
             strcat(full_path, "\0");
-            if (stat(full_path, &buffer) == 0)/*stat gets file status(if exists/not)*/
+            if (stat(full_path, &buffer) == 0)/*stat gets file status(if exists or not)*/
             {
                 free(path_cp);
                 return (full_path);
@@ -50,39 +50,32 @@ char *get_path(char *command)
 */
 void cmd_exe(char **argv)
 {
-    char *cmd, *test_path = NULL;
-    pid_t pid;
+    char *cmd, *test_path = NULL, **env = environ;
 
     if (argv)
     {
         cmd = argv[0];/* first index is command, second is file/path */
-        test_path = get_path(cmd);
         if (strcmp(cmd, "exit") == 0) /*exit functionality w 'exit' input*/
         {
             printf("exit\n");
             exit(0);
         }
-        if (strcmp(cmd, "env") == 0)
-        {
-            for (; *environ; environ++)
-                printf("%s", *environ);
-            printf("\n");
-        }
-        else
-        {
-            pid = fork();
-            if (pid < 0)
-                exit(EXIT_FAILURE);
-            else if (pid == 0)
-	    {
-		execve(test_path, argv, NULL);
-            	perror("Error");
-	    }
-	    else
-                wait(NULL);
-        }
+		if (strcmp(cmd, "env") == 0)/* prints environnment variables */
+		{
+			for (; *env; env++)
+				printf("%s\n", *env);
+			return;
+		}
+		test_path = get_path(cmd);
+		if (execve(test_path, argv, NULL) == -1)
+		{
+			perror("Error");/* formatted error by execve function */
+			return;
+		}
+		else if (execve(test_path, argv, NULL) == 0)
+			execve(test_path, argv, NULL);
+		return;
     }
-    return;
 }
 /**
 * main_loop - main while loop for shell
