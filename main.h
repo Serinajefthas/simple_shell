@@ -4,8 +4,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/wait.h>
-int cmd_exe(char **argv);
+void cmd_exe(char **argv);
 char *get_path(char *command);
 void main_loop(char *cmd, char *cmd_cp, char *argv[]);
-int main(int argc, char *argv[]);
+int main(int argc __attribute__((unused)), char *argv[]);
