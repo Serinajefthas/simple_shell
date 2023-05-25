@@ -64,19 +64,7 @@ void cmd_exe(char **argv)
     if (strcmp(cmd, "env") == 0)/* prints environnment variables */
     {
         for (; *env; env++)
-        printf("%s\n", *env);
-        return;
-    }
-    if (strcmp(cmd, "pid") == 0)
-    {
-        pid = getpid();
-        printf("%u\n", pid);
-        return;
-    }
-    if (strcmp(cmd, "ppid") == 0)
-    {
-        ppid = getppid();
-        printf("%u\n", ppid);
+            printf("%s\n", *env);
         return;
     }
     test_path = get_path(cmd);
@@ -108,7 +96,6 @@ void main_loop(char *cmd, char *cmd_cp, char *argv[])
     {
         printf("%s", prompt);
         chars_read = getline(&cmd, &size, stdin);
-        printf("%s", cmd);
         if (chars_read == -1)/* exit shell, ctrl d*/
         {
             printf("exit\n");
