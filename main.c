@@ -51,31 +51,32 @@ char *get_path(char *command)
 void cmd_exe(char **argv)
 {
     char *cmd, *test_path = NULL, **env = environ;
+    pid_t pid;
 
-    if (argv)
+    pid = fork();
+    if (pid == 0)
     {
-        cmd = argv[0];/* first index is command, second is file/path */
-        if (strcmp(cmd, "exit") == 0) /*exit functionality w 'exit' input*/
-        {
-            printf("exit\n");
-            exit(0);
-        }
-		if (strcmp(cmd, "env") == 0)/* prints environnment variables */
-		{
-			for (; *env; env++)
-				printf("%s\n", *env);
-			return;
-		}
-		test_path = get_path(cmd);
-		if (execve(test_path, argv, NULL) == -1)
-		{
-			perror("Error");/* formatted error by execve function */
-			return;
-		}
-		else if (execve(test_path, argv, NULL) == 0)
-			execve(test_path, argv, NULL);
+    	cmd = argv[0];/* first index is command, second is file/path */
+    	test_path = get_path(cmd);
+	if (strcmp(cmd, "exit") == 0) /*exit functionality w 'exit' input*/
+    	{
+        	printf("exit\n");
+        	exit(0);
+    	}
+    	if (strcmp(cmd, "env") == 0)/* prints environnment variables */
+    	{
+		for (; *env; env++)
+			printf("%s\n", *env);
 		return;
+    	}
+    	if (execve(test_path, argv, NULL) == -1)
+    	{
+		perror("Error");/* formatted error by execve function */
+		return;
+    	}
     }
+	else
+		wait(NULL);
 }
 /**
 * main_loop - main while loop for shell
@@ -94,7 +95,7 @@ void main_loop(char *cmd, char *cmd_cp, char *argv[])
     while (1)
     {
         printf("%s", prompt);
-        chars_read = getline(&cmd, &size, stdin);
+	chars_read = getline(&cmd, &size, stdin);
         if (chars_read == -1)/* exit shell, ctrl d*/
         {
             printf("exit\n");
